@@ -43,7 +43,7 @@ void JoypadFlying::receiveStateEstimateCallback(const quad_msgs::QuadStateEstima
   state_estimate_ = QuadState( *msg );
 }
 
-void JoypadFlying::copilotFeedbackCallback(const quad_msgs::HoverControllerFeedbackConstPtr &msg)
+void JoypadFlying::copilotFeedbackCallback(const quad_msgs::ControllerFeedbackConstPtr &msg)
 {
   copilot_feedback_msg_ = * msg;
 }
@@ -51,14 +51,16 @@ void JoypadFlying::copilotFeedbackCallback(const quad_msgs::HoverControllerFeedb
 void JoypadFlying::joyCallback(const sensor_msgs::Joy::ConstPtr& joy_msg)
 {
   joypad_ = *joy_msg;
+  time_last_joypad_msg_ = ros::Time::now();
 }
 
-  void JoypadFlying::receiveAssistedCommandCallback(const forest_msgs::output_commands::ConstPtr &msg)
-  {
+void JoypadFlying::receiveAssistedCommandCallback(const forest_msgs::output_commands::ConstPtr &msg)
+{
     assisted_speed=msg->speed;
     assisted_relative_yaw=msg->relativeYaw;
     assisted_delta_z=msg->deltaZ;
-  }
+    time_last_joypad_msg_ = ros::Time::now();
+ }
 
 
 bool JoypadFlying::estimateAvailable()
@@ -98,7 +100,7 @@ void JoypadFlying::mainloop(const ros::TimerEvent& time)
 {
   static int packetctr=0;
 
-  if( estimateAvailable() && copilotInHover() )
+  if( estimateAvailable() && copilotInHover() && (ros::Time::now() - time_last_joypad_msg_) < ros::Duration(joypad_timeout_))
   {
     publish_position_ = true;
   }
@@ -127,47 +129,46 @@ void JoypadFlying::mainloop(const ros::TimerEvent& time)
 
       //settings desired_state_.position.x/y would trigger the P and I components too.
       
-      double desired_speed= joypad_scale_speed_ * (joypad_.axes[axes::SPEED]+ joypad_.axes[axes::SPEED_ASSISTED]*assisted_speed);
-      double desired_relative_yaw= joypad_scale_yaw_ * (joypad_.axes[axes::YAW]+joypad_.axes[axes::YAW_ASSISTED]*assisted_relative_yaw);
+      double alpha_velocity = 1 - exp(-looprate_ / tau_velocity_);
+      
+      double desired_speed=vmax_xy_ * joypad_.axes[axes::SPEED] + joypad_.axes[axes::SPEED_ASSISTED]*assisted_speed;
+      desired_state_.yaw += (rmax_yaw_ * joypad_.axes[axes::YAW] + joypad_.axes[axes::YAW_ASSISTED]*assisted_relative_yaw) * looprate_ ;
+      desired_state_.yaw =  wrapMinusPiToPi( desired_state_.yaw );  
+      
+      QuadDesiredState measured_state;
+      
+      measured_state.velocity.x() = cos(desired_state_.yaw)*desired_speed;
+      measured_state.velocity.y() = sin(desired_state_.yaw)*desired_speed;
+      measured_state.velocity.z() = vmax_z_  * joypad_.axes[axes::Z] + joypad_.axes[axes::SPEED_ASSISTED]*assisted_delta_z;
 
-      double desired_yaw= wrapMinusPiToPi(desired_state_.yaw+desired_relative_yaw);
+      desired_state_.velocity = (1.0 - alpha_velocity) * desired_state_.velocity + alpha_velocity * measured_state.velocity ;
+      desired_state_.position += desired_state_.velocity * looprate_;
 
-      double ds=desired_speed*0.1;
-      desired_state_.position.x() += cos(desired_yaw)*ds;
-      desired_state_.position.y() += sin(desired_yaw)*ds;
-      desired_state_.position.z() += joypad_scale_z_ * joypad_.axes[axes::Z]+joypad_.axes[axes::SPEED_ASSISTED]*assisted_delta_z);
-      desired_state_.yaw = desired_yaw;
-      //desired_state_.velocity= Eigen::Vector3d(desired_speed*cos(desired_yaw),desired_speed*sin(desired_yaw),0);
       if( flyingroom_.useBounds() )
-	{
-	  flyingroom_.forceWithinArena( desired_state_ );
-	}
+      {
+        flyingroom_.forceWithinArena( desired_state_ );
+      }
 
       quad_msgs::QuadDesiredState desired_state_msg;
       desired_state_msg.header.stamp = ros::Time::now();
       desired_state_msg.header.seq = packetctr++;
       desired_state_msg.position = eigenToGeometry( desired_state_.position );
-      //desired_state_msg.velocity = eigenToGeometry( desired_state_.velocity );
+      desired_state_msg.velocity = eigenToGeometry( desired_state_.velocity );
       desired_state_msg.yaw = desired_state_.yaw;
+
       desired_state_pub_.publish( desired_state_msg );
     }
-  //
-  // Buttons
-  //
-  if( joypad_.buttons[buttons::GREEN] )
-  {
-    start_pub_.publish( std_msgs::Empty() );
-  }
-  if( joypad_.buttons[buttons::BLUE] )
-  {
-    land_pub_.publish( std_msgs::Empty() );
-  }
-  if( joypad_.buttons[buttons::YELLOW] )
-  {
-    std_msgs::Bool msg;
-    msg.data = false;
-    feedthrough_pub_.publish( std_msgs::Bool() );
-  }
+    //
+    // Start and Land Buttons
+    //
+    if( joypad_.buttons[buttons::GREEN] )
+    {
+      start_pub_.publish( std_msgs::Empty() );
+    }
+    if( joypad_.buttons[buttons::BLUE] )
+    {
+      land_pub_.publish( std_msgs::Empty() );
+    }
 }
 
 bool JoypadFlying::reloadParameters( )
@@ -175,9 +176,17 @@ bool JoypadFlying::reloadParameters( )
   std::string node_name = ros::this_node::getName();
   ROS_INFO( "[%s] Updating parameters", node_name.c_str() );
 
-  if( !loadRosParameter(node_name, "/joypad_scale_speed", joypad_scale_speed_ ) ) return false;
-  if( !loadRosParameter(node_name, "/joypad_scale_z", joypad_scale_z_ ) ) return false;
-  if( !loadRosParameter(node_name, "/joypad_scale_yaw", joypad_scale_yaw_ ) ) return false;
+  //if( !loadRosParameter(node_name, "joypad_scale_speed", joypad_scale_speed_ ) ) return false;
+  //if( !loadRosParameter(node_name, "joypad_scale_z", joypad_scale_z_ ) ) return false;
+  //if( !loadRosParameter(node_name, "joypad_scale_yaw", joypad_scale_yaw_ ) ) return false;
+
+  if( !getParam("joypad_timeout", joypad_timeout_ ) ) return false;
+  if( !getParam("vmax_xy", vmax_xy_ ) ) return false;
+  if( !getParam("vmax_z", vmax_z_ ) ) return false;
+  if( !getParam("rmax_yaw", rmax_yaw_ ) ) return false;
+  if( !getParam("looprate", looprate_ ) ) return false;
+  if( !getParam("tau_velocity", tau_velocity_ ) ) return false;
+  
 
   return true;
 }

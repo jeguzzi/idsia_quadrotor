@@ -14,10 +14,10 @@
 
 #include "sensor_msgs/Joy.h"
 #include "std_msgs/Empty.h"
-#include "std_msgs/Bool.h"
+//#include "std_msgs/Bool.h"
 
 #include "quad_msgs/QuadStateEstimate.h"
-#include "quad_msgs/HoverControllerFeedback.h"
+#include "quad_msgs/ControllerFeedback.h"
 #include "quad_msgs/QuadDesiredState.h"
 
 #include "quad_common/geometry_eigen_conversions.h"
@@ -47,7 +47,7 @@ public:
 
 private:
   void receiveStateEstimateCallback(const quad_msgs::QuadStateEstimate::ConstPtr& msg);
-  void copilotFeedbackCallback(const quad_msgs::HoverControllerFeedbackConstPtr &msg);
+  void copilotFeedbackCallback(const quad_msgs::ControllerFeedbackConstPtr &msg);
   void joyCallback(const sensor_msgs::Joy::ConstPtr& joy);
   void receiveAssistedCommandCallback(const forest_msgs::output_commands::ConstPtr& msg);
 
@@ -64,7 +64,7 @@ private:
   ros::Publisher desired_state_pub_;
   ros::Publisher start_pub_;
   ros::Publisher land_pub_;
-  ros::Publisher feedthrough_pub_;
+  //ros::Publisher feedthrough_pub_;
 
 
   ros::Subscriber state_estimate_sub_;
@@ -82,13 +82,21 @@ private:
   QuadDesiredState desired_state_;
 
   bool publish_position_;
+  ros::Time time_last_joypad_msg_;
+  double joypad_timeout_;
 
   flyingroom::Flyingroom flyingroom_;
 
-  double joypad_scale_xy_;
-  double joypad_scale_speed_;
-  double joypad_scale_z_;
-  double joypad_scale_yaw_;
+  double vmax_xy_;
+  double vmax_z_;
+  double rmax_yaw_;
+  double looprate_;
+  double tau_velocity_;
+
+  //double joypad_scale_xy_;
+  //double joypad_scale_speed_;
+  //double joypad_scale_z_;
+  //double joypad_scale_yaw_;
 
   double assisted_relative_yaw;
   double assisted_speed;
