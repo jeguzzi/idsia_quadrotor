@@ -18,6 +18,7 @@
   <build_depend>copilot</build_depend>
   <build_depend>flyingroom</build_depend>
   <build_depend>forest_msgs</build_depend>
+  <build_depend>cmake_modules</build_depend>
 
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
