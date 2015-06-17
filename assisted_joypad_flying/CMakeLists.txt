@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   quad_msgs
   copilot
   flyingroom
+  cmake_modules
 )
 find_package(Eigen REQUIRED)
 

@@ -29,7 +29,7 @@ JoypadFlying::JoypadFlying():
   desired_state_pub_ = nh_.advertise< quad_msgs::QuadDesiredState >("copilot/desired_state", 10);
   start_pub_ = nh_.advertise< std_msgs::Empty >("copilot/start",1);
   land_pub_ = nh_.advertise< std_msgs::Empty >("copilot/land",1);
-  feedthrough_pub_ = nh_.advertise< std_msgs::Bool >("copilot/feedthrough",1);
+  //feedthrough_pub_ = nh_.advertise< std_msgs::Bool >("copilot/feedthrough",1);
 
   looptimer_ = nh_.createTimer(ros::Duration( 0.1 ), &JoypadFlying::mainloop, this);
 }
