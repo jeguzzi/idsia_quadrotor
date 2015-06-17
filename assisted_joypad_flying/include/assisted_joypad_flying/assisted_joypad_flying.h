@@ -76,7 +76,7 @@ private:
   ros::Timer looptimer_;
 
   sensor_msgs::Joy joypad_;
-  quad_msgs::HoverControllerFeedback copilot_feedback_msg_;
+  quad_msgs::ControllerFeedback copilot_feedback_msg_;
 
   QuadState state_estimate_;
   QuadDesiredState desired_state_;
