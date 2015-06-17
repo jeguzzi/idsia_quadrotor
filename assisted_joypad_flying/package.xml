@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package>
+  <name>assisted_joypad_flying</name>
+  <version>0.0.0</version>
+  <description>The assisted joypad_flying package</description>
+
+  <maintainer email="jerome@idsia.ch">Jerome Guzzi</maintainer>
+
+  <license>GNU GPL</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>quad_common</build_depend>
+  <build_depend>quad_msgs</build_depend>
+  <build_depend>copilot</build_depend>
+  <build_depend>flyingroom</build_depend>
+  <build_depend>forest_msgs</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>quad_common</run_depend>
+  <run_depend>quad_msgs</run_depend>
+  <run_depend>copilot</run_depend>
+  <run_depend>flyingroom</run_depend>
+  <run_depend>forest_msgs</run_depend>
+  <export>
+
+  </export>
+</package>
