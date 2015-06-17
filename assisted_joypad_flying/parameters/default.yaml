@@ -1,5 +1,11 @@
-joypad_scale_xy:  0.1
-joypad_scale_speed:  1
-joypad_scale_z:   0.05
-joypad_scale_yaw: 0.1
+#joypad_scale_xy:  0.1
+#joypad_scale_speed:  1
+#joypad_scale_z:   0.05
+#joypad_scale_yaw: 0.1
 
+joypad_timeout:   0.5
+vmax_xy:          1.5
+vmax_z:           0.7
+rmax_yaw:         1.5
+looprate:         0.025
+tau_velocity:     0.8
