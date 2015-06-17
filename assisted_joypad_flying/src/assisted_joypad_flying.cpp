@@ -14,8 +14,8 @@ JoypadFlying::JoypadFlying():
     publish_position_(false)
 {
   joypad_ = sensor_msgs::Joy();
-  joypad_.axes = std::vector<float>(8,0);
-  joypad_.buttons = std::vector<int32_t>(8,0);
+  joypad_.axes = std::vector<float>(12,0);
+  joypad_.buttons = std::vector<int32_t>(12,0);
 
   reloadParameters();
 
@@ -131,15 +131,18 @@ void JoypadFlying::mainloop(const ros::TimerEvent& time)
       
       double alpha_velocity = 1 - exp(-looprate_ / tau_velocity_);
       
-      double desired_speed=vmax_xy_ * joypad_.axes[axes::SPEED] + joypad_.axes[axes::SPEED_ASSISTED]*assisted_speed;
-      desired_state_.yaw += (rmax_yaw_ * joypad_.axes[axes::YAW] + joypad_.axes[axes::YAW_ASSISTED]*assisted_relative_yaw) * looprate_ ;
+      double desired_speed=vmax_xy_ * joypad_.axes[axes::SPEED] + joypad_.buttons[buttons::SPEED_ASSISTED]*assisted_speed;
+      desired_state_.yaw += (rmax_yaw_ * joypad_.axes[axes::YAW] + joypad_.buttons[buttons::YAW_ASSISTED]*assisted_relative_yaw) * looprate_ ;
       desired_state_.yaw =  wrapMinusPiToPi( desired_state_.yaw );  
       
+
+      ROS_INFO("assisted rel yaw %.3f, assisted speed %.3f => des speed %.3f, des yaw %.3f",assisted_relative_yaw,assisted_speed,desired_speed,desired_state_.yaw);
+
       QuadDesiredState measured_state;
       
       measured_state.velocity.x() = cos(desired_state_.yaw)*desired_speed;
       measured_state.velocity.y() = sin(desired_state_.yaw)*desired_speed;
-      measured_state.velocity.z() = vmax_z_  * joypad_.axes[axes::Z] + joypad_.axes[axes::SPEED_ASSISTED]*assisted_delta_z;
+      measured_state.velocity.z() = vmax_z_  * joypad_.axes[axes::Z] + joypad_.axes[buttons::SPEED_ASSISTED]*assisted_delta_z;
 
       desired_state_.velocity = (1.0 - alpha_velocity) * desired_state_.velocity + alpha_velocity * measured_state.velocity ;
       desired_state_.position += desired_state_.velocity * looprate_;

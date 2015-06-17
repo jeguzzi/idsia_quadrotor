@@ -5,11 +5,9 @@ namespace joypad_node
 {
   namespace axes
   {
-    const uint32_t SPEED = 4;
-    const uint32_t Z = 7 ;
-    const uint32_t YAW = 3;
-    const uint32_t SPEED_ASSISTED = 5;
-    const uint32_t YAW_ASSISTED = 2;
+    const uint32_t SPEED = 3;
+    const uint32_t Z = 1 ;
+    const uint32_t YAW = 0;
 
   }
   namespace buttons
@@ -21,6 +19,10 @@ namespace joypad_node
 
     const uint32_t LB=4;
     const uint32_t RB=5;
+
+    const uint32_t SPEED_ASSISTED = 7;
+    const uint32_t YAW_ASSISTED = 6;
+
   }
 } // namespace joypad_node
 
