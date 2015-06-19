@@ -5,10 +5,10 @@ namespace joypad_node
 {
   namespace axes
   {
-    const uint32_t SPEED = 3;
-    const uint32_t Z = 1 ;
-    const uint32_t YAW = 0;
-
+    const uint32_t X = 4; // 1
+    const uint32_t Y = 3; // 0
+    const uint32_t Z = 1; // 4
+    const uint32_t YAW = 0; // 3
   }
   namespace buttons
   {

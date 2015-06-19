@@ -1,6 +1,3 @@
-#Derived from the joypad_flying package by rpg
-#Mix input from /assisted_cmd topic and joystick
-
 cmake_minimum_required(VERSION 2.8.3)
 project(assisted_joypad_flying)
 
@@ -42,6 +39,3 @@ target_link_libraries(assisted_joypad_flying
  )
 
 add_dependencies(assisted_joypad_flying forest_msgs_generate_messages_cpp)
- 
-
-

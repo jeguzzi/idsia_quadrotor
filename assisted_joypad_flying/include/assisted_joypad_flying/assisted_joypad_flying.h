@@ -31,7 +31,7 @@
 #include "copilot/states.h"
 #include "assisted_joypad_flying/joypad_buttons_axes.h"
 
-#include "forest_msgs/output_commands.h"
+#include "geometry_msgs/Twist.h"
 
 namespace joypad_node
 {
@@ -49,7 +49,7 @@ private:
   void receiveStateEstimateCallback(const quad_msgs::QuadStateEstimate::ConstPtr& msg);
   void copilotFeedbackCallback(const quad_msgs::ControllerFeedbackConstPtr &msg);
   void joyCallback(const sensor_msgs::Joy::ConstPtr& joy);
-  void receiveAssistedCommandCallback(const forest_msgs::output_commands::ConstPtr& msg);
+  void receiveAssistedCommandCallback(const geometry_msgs::Twist::ConstPtr& msg);
 
   bool estimateAvailable();
   bool mustUpdateDesiredState();
@@ -93,14 +93,8 @@ private:
   double looprate_;
   double tau_velocity_;
 
-  //double joypad_scale_xy_;
-  //double joypad_scale_speed_;
-  //double joypad_scale_z_;
-  //double joypad_scale_yaw_;
+  geometry_msgs::Twist assisted_twist;
 
-  double assisted_relative_yaw;
-  double assisted_speed;
-  double assisted_delta_z;
 };
 
 } /* namespace joypad_flying */

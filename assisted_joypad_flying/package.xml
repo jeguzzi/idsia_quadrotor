@@ -2,14 +2,18 @@
 <package>
   <name>assisted_joypad_flying</name>
   <version>0.0.0</version>
-  <description>The assisted joypad_flying package</description>
+  <description>
+    The assisted joypad_flying package
+    Derived from the joypad_flying package by rpg
+    Mix input from /assisted_cmd topic and joystick
+  </description>
 
   <maintainer email="jerome@idsia.ch">Jerome Guzzi</maintainer>
 
   <license>GNU GPL</license>
 
   <buildtool_depend>catkin</buildtool_depend>
-
+  <buildtool_depend>catkin_simple</buildtool_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>sensor_msgs</build_depend>
@@ -17,7 +21,7 @@
   <build_depend>quad_msgs</build_depend>
   <build_depend>copilot</build_depend>
   <build_depend>flyingroom</build_depend>
-  <build_depend>forest_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
   <build_depend>cmake_modules</build_depend>
 
   <run_depend>roscpp</run_depend>
@@ -27,7 +31,7 @@
   <run_depend>quad_msgs</run_depend>
   <run_depend>copilot</run_depend>
   <run_depend>flyingroom</run_depend>
-  <run_depend>forest_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
   <export>
 
   </export>
