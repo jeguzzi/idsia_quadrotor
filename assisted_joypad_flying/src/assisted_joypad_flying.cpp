@@ -53,7 +53,7 @@ void JoypadFlying::joyCallback(const sensor_msgs::Joy::ConstPtr& joy_msg)
 
 void JoypadFlying::receiveAssistedCommandCallback(const geometry_msgs::Twist::ConstPtr &msg)
 {
-    assisted_twist=msg;
+    assisted_twist=*msg;
  }
 
 
@@ -124,20 +124,26 @@ void JoypadFlying::mainloop(const ros::TimerEvent& time)
       //settings desired_state_.position.x/y would trigger the P and I components too.
 
       double alpha_velocity = 1 - exp(-looprate_ / tau_velocity_);
-      double desired_transveral_speed=-vmax_xy_ * joypad_.axes[axes::Y]+joypad_.buttons[buttons::SPEED_ASSISTED]*assisted_twist.linear.y;
-      double desired_speed=vmax_xy_ * joypad_.axes[axes::X] + joypad_.buttons[buttons::SPEED_ASSISTED]*assisted_twist.linear.x;
-      desired_state_.yaw += (rmax_yaw_ * joypad_.axes[axes::YAW] + joypad_.buttons[buttons::YAW_ASSISTED]*assisted_twist.linear.z) * looprate_ ;
+      double desired_transveral_speed=-vmax_xy_ * joypad_.axes[axes::Y]
+                                     +joypad_.buttons[buttons::SPEED_ASSISTED]*assisted_twist.linear.y;
+      double desired_speed=vmax_xy_ * joypad_.axes[axes::X]
+                          + joypad_.buttons[buttons::SPEED_ASSISTED]*assisted_twist.linear.x;
+      desired_state_.yaw += (rmax_yaw_ * joypad_.axes[axes::YAW]
+                          + joypad_.buttons[buttons::YAW_ASSISTED]*assisted_twist.angular.z) * looprate_ ;
       desired_state_.yaw =  wrapMinusPiToPi( desired_state_.yaw );
 
-      ROS_INFO("assisted rel yaw %.3f, assisted speed %.3f => des speed %.3f, des yaw %.3f",assisted_relative_yaw,assisted_speed,desired_speed,desired_state_.yaw);
+      ROS_INFO("assisted rel yaw %.3f, assisted speed %.3f => des speed %.3f, des yaw %.3f",
+                assisted_twist.angular.z,assisted_twist.linear.x,desired_speed,desired_state_.yaw);
 
       QuadDesiredState measured_state;
 
       measured_state.velocity.x() = cos(desired_state_.yaw)*desired_speed-sin(desired_state_.yaw)*desired_transveral_speed;
       measured_state.velocity.y() = sin(desired_state_.yaw)*desired_speed+cos(desired_state_.yaw)*desired_transveral_speed;
-      measured_state.velocity.z() = vmax_z_  * joypad_.axes[axes::Z] + joypad_.axes[buttons::SPEED_ASSISTED]*assisted_twist.linear.z;
+      measured_state.velocity.z() = vmax_z_  * joypad_.axes[axes::Z]
+                                  + joypad_.axes[buttons::SPEED_ASSISTED]*assisted_twist.linear.z;
 
-      desired_state_.velocity = (1.0 - alpha_velocity) * desired_state_.velocity + alpha_velocity * measured_state.velocity ;
+      desired_state_.velocity = (1.0 - alpha_velocity) * desired_state_.velocity
+                              + alpha_velocity * measured_state.velocity ;
       desired_state_.position += desired_state_.velocity * looprate_;
 
       if( flyingroom_.useBounds() )

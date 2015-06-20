@@ -18,7 +18,7 @@ find_package(Eigen REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS roscpp std_msgs sensor_msgs quad_common quad_msgs copilot flyingroom forest_msgs
+  CATKIN_DEPENDS roscpp std_msgs sensor_msgs quad_common quad_msgs copilot flyingroom geometry_msgs
   DEPENDS eigen
 )
 
