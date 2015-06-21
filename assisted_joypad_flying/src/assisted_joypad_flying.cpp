@@ -111,7 +111,7 @@ void JoypadFlying::mainloop(const ros::TimerEvent& time)
     desired_state_.position = state_estimate_.position;
     desired_state_.yaw = quaternionToEulerAnglesZYX(state_estimate_.orientation).z();
   }
-
+  //ROS_INFO("s %.4f, y %.4f",joypad_.axes[axes::SPEED_ASSISTED],joypad_.axes[axes::YAW_ASSISTED]);
   //
   // publish a desired state update if in manual hover mode
   //
@@ -126,13 +126,13 @@ void JoypadFlying::mainloop(const ros::TimerEvent& time)
       double speed_mix=0.0;
       double yaw_mix=0.0;
 
-      if (joypad_.buttons[axes::SPEED_ASSISTED]<0.7)
+      if (joypad_.axes[axes::SPEED_ASSISTED]<0.0)
       {
-        speed_mix=-(joypad_.buttons[axes::SPEED_ASSISTED]-0.7)/1.7;
+        speed_mix=-(joypad_.axes[axes::SPEED_ASSISTED]);
       }
-      if (joypad_.buttons[axes::YAW_ASSISTED]<0.7)
+      if (joypad_.axes[axes::YAW_ASSISTED]<0.0)
       {
-        yaw_mix=-(joypad_.buttons[axes::YAW_ASSISTED]-0.7)/1.7;
+        yaw_mix=-(joypad_.axes[axes::YAW_ASSISTED]);
       }
 
       double alpha_velocity = 1 - exp(-looprate_ / tau_velocity_);
@@ -144,8 +144,8 @@ void JoypadFlying::mainloop(const ros::TimerEvent& time)
                           + yaw_mix*assisted_twist.angular.z) * looprate_ ;
       desired_state_.yaw =  wrapMinusPiToPi( desired_state_.yaw );
 
-      ROS_INFO("assisted rel yaw %.3f, assisted speed %.3f => des speed %.3f, des yaw %.3f",
-                assisted_twist.angular.z,assisted_twist.linear.x,desired_speed,desired_state_.yaw);
+      ROS_INFO("speed_mix %3.f, yaw_mix %.3f, assisted rel yaw %.3f, assisted speed %.3f => des speed %.3f, des yaw %.3f",
+	       speed_mix,yaw_mix,assisted_twist.angular.z,assisted_twist.linear.x,desired_speed,desired_state_.yaw);
 
       QuadDesiredState measured_state;
 
