@@ -136,7 +136,7 @@ void JoypadFlying::mainloop(const ros::TimerEvent& time)
       }
 
       double alpha_velocity = 1 - exp(-looprate_ / tau_velocity_);
-      double desired_transveral_speed=-vmax_xy_ * joypad_.axes[axes::Y]
+      double desired_transveral_speed=vmax_xy_ * joypad_.axes[axes::Y]
                                      +speed_mix*assisted_twist.linear.y;
       double desired_speed=vmax_xy_ * joypad_.axes[axes::X]
                           + speed_mix*assisted_twist.linear.x;
